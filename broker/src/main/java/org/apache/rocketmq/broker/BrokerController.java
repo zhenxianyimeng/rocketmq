@@ -405,6 +405,7 @@ public class BrokerController {
             }
 
             if (!messageStoreConfig.isEnableDLegerCommitLog()) {
+                //判断 手否为SLAVE
                 if (BrokerRole.SLAVE == this.messageStoreConfig.getBrokerRole()) {
                     if (this.messageStoreConfig.getHaMasterAddress() != null && this.messageStoreConfig.getHaMasterAddress().length() >= 6) {
                         this.messageStore.updateHaMasterAddress(this.messageStoreConfig.getHaMasterAddress());
@@ -1113,13 +1114,14 @@ public class BrokerController {
                 @Override
                 public void run() {
                     try {
+                        //启动定时任务，同步元数据
                         BrokerController.this.slaveSynchronize.syncAll();
                     }
                     catch (Throwable e) {
                         log.error("ScheduledTask SlaveSynchronize syncAll error.", e);
                     }
                 }
-            }, 1000 * 3, 1000 * 10, TimeUnit.MILLISECONDS);
+            }, 1000 * 3, 1000 * 10, TimeUnit.MILLISECONDS);//10s一次
         } else {
             //handle the slave synchronise
             if (null != slaveSyncFuture) {
