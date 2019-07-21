@@ -323,6 +323,7 @@ public class HAService {
         }
     }
 
+    //向master连接
     class HAClient extends ServiceThread {
         private static final int READ_MAX_BUFFER_SIZE = 1024 * 1024 * 4;
         private final AtomicReference<String> masterAddress = new AtomicReference<>();
@@ -430,6 +431,11 @@ public class HAService {
             return true;
         }
 
+        /**
+         * 读取Master传输的CommitLog数据，并且返回是否异常
+         * 读取到数据写入CommitLog
+         * @return
+         */
         private boolean dispatchReadRequest() {
             final int msgHeaderSize = 8 + 4; // phyoffset + size
             int readSocketPos = this.byteBufferRead.position();
@@ -438,10 +444,12 @@ public class HAService {
                 int diff = this.byteBufferRead.position() - this.dispatchPostion;
                 if (diff >= msgHeaderSize) {
                     long masterPhyOffset = this.byteBufferRead.getLong(this.dispatchPostion);
+
                     int bodySize = this.byteBufferRead.getInt(this.dispatchPostion + 8);
 
                     long slavePhyOffset = HAService.this.defaultMessageStore.getMaxPhyOffset();
 
+                    //slave节点最大的位点必须等于master开始的位点
                     if (slavePhyOffset != 0) {
                         if (slavePhyOffset != masterPhyOffset) {
                             log.error("master pushed offset not equal the max phy offset in slave, SLAVE: "
@@ -468,6 +476,7 @@ public class HAService {
                     }
                 }
 
+                //空间满了之后，重新分配
                 if (!this.byteBufferRead.hasRemaining()) {
                     this.reallocateByteBuffer();
                 }
@@ -493,6 +502,7 @@ public class HAService {
             return result;
         }
 
+        //Socket 主动链接 master  commitlog使用原生的socket同步
         private boolean connectMaster() throws ClosedChannelException {
             if (null == socketChannel) {
                 String addr = this.masterAddress.get();
@@ -542,6 +552,10 @@ public class HAService {
             }
         }
 
+        /**
+         * client（slave）主循环，实现了不断从master传输CommitLog数据，
+         * 上传Master自己本地的CommitLog已经同步的物理位置
+         */
         @Override
         public void run() {
             log.info(this.getServiceName() + " service started");

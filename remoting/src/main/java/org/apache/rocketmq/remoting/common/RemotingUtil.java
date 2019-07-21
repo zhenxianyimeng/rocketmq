@@ -35,6 +35,9 @@ import java.util.Enumeration;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 
+/**
+ * 原生NIO
+ */
 public class RemotingUtil {
     public static final String OS_NAME = System.getProperty("os.name");
 
@@ -169,10 +172,12 @@ public class RemotingUtil {
             sc = SocketChannel.open();
             sc.configureBlocking(true);
             sc.socket().setSoLinger(false, -1);
+            //禁用Nagle算法，使用小数据传输，Nagle算法通过小缓存区的小包封装成大包在发送
             sc.socket().setTcpNoDelay(true);
             sc.socket().setReceiveBufferSize(1024 * 64);
             sc.socket().setSendBufferSize(1024 * 64);
             sc.socket().connect(remote, timeoutMillis);
+            //Fixme ？ 开始设置Bloking true， 又设置Bloking false，是否矛盾？
             sc.configureBlocking(false);
             return sc;
         } catch (Exception e) {
