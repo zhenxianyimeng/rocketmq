@@ -28,7 +28,9 @@ public class MQFaultStrategy {
 
     private boolean sendLatencyFaultEnable = false;
 
+    //消息发送时长的延迟级别数组，当消息发送延迟的区间选择。和下面的broker的notAvailableDuration数组对应
     private long[] latencyMax = {50L, 100L, 550L, 1000L, 2000L, 3000L, 15000L};
+    //broker不可用数组，消息发送时间越长，broker就需要越久的等待，才可以被选择
     private long[] notAvailableDuration = {0L, 0L, 30000L, 60000L, 120000L, 180000L, 600000L};
 
     public long[] getNotAvailableDuration() {

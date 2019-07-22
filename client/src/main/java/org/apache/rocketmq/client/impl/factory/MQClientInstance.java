@@ -625,6 +625,7 @@ public class MQClientInstance {
                             }
                         }
                     } else {
+                        //从NameServer获取Topic路由信息
                         topicRouteData = this.mQClientAPIImpl.getTopicRouteInfoFromNameServer(topic, 1000 * 3);
                     }
                     if (topicRouteData != null) {
