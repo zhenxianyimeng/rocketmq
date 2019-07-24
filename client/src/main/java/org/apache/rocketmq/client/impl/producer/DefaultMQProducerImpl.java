@@ -706,7 +706,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         if (brokerAddr != null) {
             //是否使用broker vip通道， broker开启两个通道对外服务
             brokerAddr = MixAll.brokerVIPChannel(this.defaultMQProducer.isSendMessageWithVIPChannel(), brokerAddr);
-
+            //备份消息
             byte[] prevBody = msg.getBody();
             try {
                 //for MessageBatch,ID has been set in the generating process
@@ -768,6 +768,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                     this.executeSendMessageHookBefore(context);
                 }
 
+                //消息头构建
                 SendMessageRequestHeader requestHeader = new SendMessageRequestHeader();
                 requestHeader.setProducerGroup(this.defaultMQProducer.getProducerGroup());
                 requestHeader.setTopic(msg.getTopic());
@@ -796,6 +797,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                 }
 
                 SendResult sendResult = null;
+                //发送模式选择
                 switch (communicationMode) {
                     case ASYNC:
                         Message tmpMessage = msg;
@@ -842,6 +844,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         if (timeout < costTimeSync) {
                             throw new RemotingTooMuchRequestException("sendKernelImpl call timeout");
                         }
+                        //发送消息
                         sendResult = this.mQClientFactory.getMQClientAPIImpl().sendMessage(
                             brokerAddr,
                             mq.getBrokerName(),

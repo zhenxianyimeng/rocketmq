@@ -171,6 +171,13 @@ public class MQClientAPIImpl {
     private String nameSrvAddr = null;
     private ClientConfig clientConfig;
 
+    /**
+     * 注册初始化
+     * @param nettyClientConfig
+     * @param clientRemotingProcessor
+     * @param rpcHook
+     * @param clientConfig
+     */
     public MQClientAPIImpl(final NettyClientConfig nettyClientConfig,
         final ClientRemotingProcessor clientRemotingProcessor,
         RPCHook rpcHook, final ClientConfig clientConfig) {
@@ -297,6 +304,25 @@ public class MQClientAPIImpl {
         return sendMessage(addr, brokerName, msg, requestHeader, timeoutMillis, communicationMode, null, null, null, 0, context, producer);
     }
 
+    /**
+     *
+     * @param addr
+     * @param brokerName
+     * @param msg
+     * @param requestHeader
+     * @param timeoutMillis
+     * @param communicationMode
+     * @param sendCallback
+     * @param topicPublishInfo
+     * @param instance
+     * @param retryTimesWhenSendFailed
+     * @param context
+     * @param producer
+     * @return
+     * @throws RemotingException
+     * @throws MQBrokerException
+     * @throws InterruptedException
+     */
     public SendResult sendMessage(
         final String addr,
         final String brokerName,
@@ -312,6 +338,7 @@ public class MQClientAPIImpl {
         final DefaultMQProducerImpl producer
     ) throws RemotingException, MQBrokerException, InterruptedException {
         long beginStartTime = System.currentTimeMillis();
+        //封装成 RemotingCommand 对象
         RemotingCommand request = null;
         if (sendSmartMsg || msg instanceof MessageBatch) {
             SendMessageRequestHeaderV2 requestHeaderV2 = SendMessageRequestHeaderV2.createSendMessageRequestHeaderV2(requestHeader);
@@ -356,6 +383,7 @@ public class MQClientAPIImpl {
         final long timeoutMillis,
         final RemotingCommand request
     ) throws RemotingException, MQBrokerException, InterruptedException {
+        //同步发消息
         RemotingCommand response = this.remotingClient.invokeSync(addr, request, timeoutMillis);
         assert response != null;
         return this.processSendResponse(brokerName, msg, response);

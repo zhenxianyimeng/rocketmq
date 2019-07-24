@@ -31,6 +31,17 @@ public interface RemotingClient extends RemotingService {
 
     List<String> getNameServerAddressList();
 
+    /**
+     *
+     * @param addr
+     * @param request
+     * @param timeoutMillis
+     * @return
+     * @throws InterruptedException
+     * @throws RemotingConnectException
+     * @throws RemotingSendRequestException
+     * @throws RemotingTimeoutException
+     */
     RemotingCommand invokeSync(final String addr, final RemotingCommand request,
         final long timeoutMillis) throws InterruptedException, RemotingConnectException,
         RemotingSendRequestException, RemotingTimeoutException;
@@ -43,12 +54,27 @@ public interface RemotingClient extends RemotingService {
         throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException,
         RemotingTimeoutException, RemotingSendRequestException;
 
+    /**
+     * 注册一些底层的数据通讯服务，元数据同步和 commitlog等
+     * @param requestCode
+     * @param processor
+     * @param executor
+     */
     void registerProcessor(final int requestCode, final NettyRequestProcessor processor,
         final ExecutorService executor);
 
+    /**
+     * 回调函数执行线程设置，用于生产者发送消息后的回调线程池
+     * @param callbackExecutor
+     */
     void setCallbackExecutor(final ExecutorService callbackExecutor);
 
     ExecutorService getCallbackExecutor();
 
+    /**
+     * channel是否可用
+     * @param addr
+     * @return
+     */
     boolean isChannelWritable(final String addr);
 }
