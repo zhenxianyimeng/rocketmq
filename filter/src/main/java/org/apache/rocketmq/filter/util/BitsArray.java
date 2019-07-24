@@ -22,6 +22,7 @@ package org.apache.rocketmq.filter.util;
  */
 public class BitsArray implements Cloneable {
 
+
     private byte[] bytes;
     private int bitLength;
 
