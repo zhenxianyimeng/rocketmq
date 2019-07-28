@@ -34,6 +34,7 @@ public class KVConfigManager {
     private final NamesrvController namesrvController;
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    //fixme 初始化map不需要指定类型 zhenxianyimeng
     private final HashMap<String/* Namespace */, HashMap<String/* Key */, String/* Value */>> configTable =
         new HashMap<String, HashMap<String, String>>();
 
