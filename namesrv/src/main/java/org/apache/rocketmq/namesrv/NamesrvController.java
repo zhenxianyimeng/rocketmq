@@ -77,6 +77,9 @@ public class NamesrvController {
 
         this.kvConfigManager.load();
 
+        /**
+         * 启动netty服务
+         */
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
 
         this.remotingExecutor =
@@ -84,6 +87,9 @@ public class NamesrvController {
 
         this.registerProcessor();
 
+        /**
+         * 扫描broker
+         */
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
