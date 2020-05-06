@@ -54,6 +54,7 @@ public class NamesrvStartup {
     public static NamesrvController main0(String[] args) {
 
         try {
+            //初始化namesrvConfig和nettyServerConfig配置对象，以及创建核心对象Controller
             NamesrvController controller = createNamesrvController(args);
             start(controller);
             String tip = "The Name Server boot success. serializeType=" + RemotingCommand.getSerializeTypeConfigInThisServer();
@@ -73,6 +74,7 @@ public class NamesrvStartup {
         //PackageConflictDetect.detectFastjson();
 
         Options options = ServerUtil.buildCommandlineOptions(new Options());
+        //利用commandLine 解析工具
         commandLine = ServerUtil.parseCmdLine("mqnamesrv", args, buildCommandlineOptions(options), new PosixParser());
         if (null == commandLine) {
             System.exit(-1);
@@ -143,6 +145,9 @@ public class NamesrvStartup {
             System.exit(-3);
         }
 
+        /**
+         * JVM钩子函数
+         */
         Runtime.getRuntime().addShutdownHook(new ShutdownHookThread(log, new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -151,6 +156,7 @@ public class NamesrvStartup {
             }
         }));
 
+        //启动netty服务
         controller.start();
 
         return controller;

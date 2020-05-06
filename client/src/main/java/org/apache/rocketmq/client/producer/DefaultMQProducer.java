@@ -96,6 +96,7 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
 
     /**
      * Compress message body threshold, namely, message body larger than 4k will be compressed on default.
+     * 消息体超过该值后进行压缩
      */
     private int compressMsgBodyOverHowmuch = 1024 * 4;
 
@@ -121,7 +122,7 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
     private boolean retryAnotherBrokerWhenNotStoreOK = false;
 
     /**
-     * Maximum allowed message size in bytes.
+     * Maximum allowed message size in bytes. 消息最大长度
      */
     private int maxMessageSize = 1024 * 1024 * 4; // 4M
 
@@ -719,7 +720,7 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
 
     /**
      * Query message of the given offset message ID.
-     *
+     * 根据消息偏移量查找消息
      * This method will be removed in a certain version after April 5, 2020, so please do not use this method.
      *
      * @param offsetMsgId message id
@@ -740,7 +741,7 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
      * Query message by key.
      *
      * This method will be removed in a certain version after April 5, 2020, so please do not use this method.
-     *
+     * 根据组合条件查找消息
      * @param topic message topic
      * @param key message key index word
      * @param maxNum max message number

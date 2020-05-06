@@ -59,6 +59,10 @@ public class ClientConfig {
 
     private LanguageCode language = LanguageCode.JAVA;
 
+    /**
+     * 同一个JVM中不同消费者和生产者启动时获取到的MQClientInstance实例是同一个
+     * @return
+     */
     public String buildMQClientId() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.getClientIP());

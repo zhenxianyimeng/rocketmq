@@ -45,13 +45,17 @@ import org.apache.rocketmq.common.protocol.route.TopicRouteData;
 import org.apache.rocketmq.common.sysflag.TopicSysFlag;
 import org.apache.rocketmq.remoting.common.RemotingUtil;
 
+
+/**
+ * 路由信息表
+ */
 public class RouteInfoManager {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
     private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;
-    private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;
-    private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;
+    private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;//topic队列信息，topic所在broker，读队列，写队列信息
+    private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;//broker节点信息，包括brokername，所在集群，准备节点信息。
+    private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;//broker集群信息
     private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable; //存储在线的broker信息
     private final HashMap<String/* brokerAddr */, List<String>/* Filter Server */> filterServerTable;
 
@@ -125,7 +129,7 @@ public class RouteInfoManager {
             try {
                 // 读写锁
                 this.lock.writeLock().lockInterruptibly();
-
+                //将当前发心跳的broker加入到set集合中
                 Set<String> brokerNames = this.clusterAddrTable.get(clusterName);
                 if (null == brokerNames) {
                     brokerNames = new HashSet<String>();
