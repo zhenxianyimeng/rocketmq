@@ -23,11 +23,14 @@ import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.common.protocol.route.QueueData;
 import org.apache.rocketmq.common.protocol.route.TopicRouteData;
 
+/**
+ * 主题发送消息
+ */
 public class TopicPublishInfo {
-    private boolean orderTopic = false;
+    private boolean orderTopic = false; //是否是顺序消息
     private boolean haveTopicRouterInfo = false;
-    private List<MessageQueue> messageQueueList = new ArrayList<MessageQueue>();
-    private volatile ThreadLocalIndex sendWhichQueue = new ThreadLocalIndex();
+    private List<MessageQueue> messageQueueList = new ArrayList<MessageQueue>();//该主题的消息队列，默认分四个
+    private volatile ThreadLocalIndex sendWhichQueue = new ThreadLocalIndex();//用于选择消息队列，每次加1
     private TopicRouteData topicRouteData;
 
     public boolean isOrderTopic() {
@@ -66,6 +69,7 @@ public class TopicPublishInfo {
         this.haveTopicRouterInfo = haveTopicRouterInfo;
     }
 
+    //lastBrokerName 上一次执行发送消息失败的broker
     public MessageQueue selectOneMessageQueue(final String lastBrokerName) {
         if (lastBrokerName == null) {
             return selectOneMessageQueue();
