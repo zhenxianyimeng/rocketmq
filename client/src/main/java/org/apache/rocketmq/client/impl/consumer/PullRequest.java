@@ -19,8 +19,11 @@ package org.apache.rocketmq.client.impl.consumer;
 import org.apache.rocketmq.common.message.MessageQueue;
 
 public class PullRequest {
+    //消费组
     private String consumerGroup;
+    //待拉取的消息队列
     private MessageQueue messageQueue;
+    //消费端的消息队列，是broker上的messagequeue的快照，默认一次拉取32条
     private ProcessQueue processQueue;
     private long nextOffset;
     private boolean lockedFirst = false;

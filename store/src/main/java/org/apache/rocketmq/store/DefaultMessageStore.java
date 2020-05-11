@@ -178,6 +178,8 @@ public class DefaultMessageStore implements MessageStore {
         boolean result = true;
 
         try {
+            //判断abort文件是否存在，正常退出会通过JVM钩子函数删除该文件，如果该文件存在，说明异常退出了
+            //异常退出，有可能CommitLog和ComsumeQueue数据不一致
             boolean lastExitOK = !this.isTempFileExist();
             log.info("last shutdown {}", lastExitOK ? "normally" : "abnormally");
 
@@ -185,18 +187,20 @@ public class DefaultMessageStore implements MessageStore {
                 result = result && this.scheduleMessageService.load();
             }
 
-            // load Commit Log
+            // load Commit Log 加载所有MappedFile
             result = result && this.commitLog.load();
 
-            // load Consume Queue
+            // load Consume Queue 加载所有ComsumeQueue
             result = result && this.loadConsumeQueue();
 
             if (result) {
                 this.storeCheckpoint =
                     new StoreCheckpoint(StorePathConfigHelper.getStoreCheckpoint(this.messageStoreConfig.getStorePathRootDir()));
 
+                //加载索引文件，
                 this.indexService.load(lastExitOK);
 
+                //消息恢复，根据上次是否退出异常，采用不同的恢复策略
                 this.recover(lastExitOK);
 
                 log.info("load over, and the max phy offset = {}", this.getMaxPhyOffset());
@@ -257,6 +261,7 @@ public class DefaultMessageStore implements MessageStore {
             }
             log.info("[SetReputOffset] maxPhysicalPosInLogicQueue={} clMinOffset={} clMaxOffset={} clConfirmedOffset={}",
                 maxPhysicalPosInLogicQueue, this.commitLog.getMinOffset(), this.commitLog.getMaxOffset(), this.commitLog.getConfirmOffset());
+            // 从CommitLog的哪个偏移量开始发送
             this.reputMessageService.setReputFromOffset(maxPhysicalPosInLogicQueue);
             this.reputMessageService.start();
 
@@ -1817,6 +1822,7 @@ public class DefaultMessageStore implements MessageStore {
             return this.reputFromOffset < DefaultMessageStore.this.commitLog.getMaxOffset();
         }
 
+        //发送CommitLog的消息到ComsumeQueue和IndexFile
         private void doReput() {
             if (this.reputFromOffset < DefaultMessageStore.this.commitLog.getMinOffset()) {
                 log.warn("The reputFromOffset={} is smaller than minPyOffset={}, this usually indicate that the dispatch behind too much and the commitlog has expired.",
@@ -1842,6 +1848,7 @@ public class DefaultMessageStore implements MessageStore {
 
                             if (dispatchRequest.isSuccess()) {
                                 if (size > 0) {
+                                    //发送消息内容到IndexFile和ComsumeQueue
                                     DefaultMessageStore.this.doDispatch(dispatchRequest);
 
                                     if (BrokerRole.SLAVE != DefaultMessageStore.this.getMessageStoreConfig().getBrokerRole()

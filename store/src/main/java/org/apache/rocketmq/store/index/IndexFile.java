@@ -187,6 +187,7 @@ public class IndexFile {
         return result;
     }
 
+    //TODO zhenxianyimeng  出参入参选择，应该把phyOffsets放到返回值
     public void selectPhyOffset(final List<Long> phyOffsets, final String key, final int maxNum,
         final long begin, final long end, boolean lock) {
         if (this.mappedFile.hold()) {
@@ -243,7 +244,7 @@ public class IndexFile {
                             || prevIndexRead == nextIndexToRead || timeRead < begin) {
                             break;
                         }
-
+                        //hash冲突，前向查找
                         nextIndexToRead = prevIndexRead;
                     }
                 }

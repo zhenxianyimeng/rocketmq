@@ -73,7 +73,7 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
      * Consumers of the same role is required to have exactly same subscriptions and consumerGroup to correctly achieve
      * load balance. It's required and needs to be globally unique.
      * </p>
-     *
+     *  消费者组
      * See <a href="http://rocketmq.apache.org/docs/core-concept/">here</a> for further discussion.
      */
     private String consumerGroup;
@@ -686,6 +686,7 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
      * This method gets internal infrastructure readily to serve. Instances must call this method after configuration.
      *
      * @throws MQClientException if there is any client error.
+     * 启动消费者
      */
     @Override
     public void start() throws MQClientException {

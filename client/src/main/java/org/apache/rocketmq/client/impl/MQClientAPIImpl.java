@@ -619,6 +619,7 @@ public class MQClientAPIImpl {
         return null;
     }
 
+    //异步向broker发送请求，拉取消息
     private void pullMessageAsync(
         final String addr,
         final RemotingCommand request,

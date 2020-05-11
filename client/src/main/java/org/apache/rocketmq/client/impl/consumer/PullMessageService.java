@@ -77,6 +77,7 @@ public class PullMessageService extends ServiceThread {
     }
 
     private void pullMessage(final PullRequest pullRequest) {
+        //根据消费组，选择一个消费组实例
         final MQConsumerInner consumer = this.mQClientFactory.selectConsumer(pullRequest.getConsumerGroup());
         if (consumer != null) {
             DefaultMQPushConsumerImpl impl = (DefaultMQPushConsumerImpl) consumer;
@@ -92,6 +93,7 @@ public class PullMessageService extends ServiceThread {
 
         while (!this.isStopped()) {
             try {
+                //
                 PullRequest pullRequest = this.pullRequestQueue.take();
                 this.pullMessage(pullRequest);
             } catch (InterruptedException ignored) {

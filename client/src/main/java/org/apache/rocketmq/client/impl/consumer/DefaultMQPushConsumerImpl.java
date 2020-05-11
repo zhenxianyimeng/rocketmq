@@ -209,6 +209,10 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
         this.offsetStore = offsetStore;
     }
 
+    /**
+     * 推模式的拉实现
+     * @param pullRequest
+     */
     public void pullMessage(final PullRequest pullRequest) {
         final ProcessQueue processQueue = pullRequest.getProcessQueue();
         if (processQueue.isDropped()) {
@@ -234,7 +238,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
 
         long cachedMessageCount = processQueue.getMsgCount().get();
         long cachedMessageSizeInMiB = processQueue.getMsgSize().get() / (1024 * 1024);
-
+        //拉取的消息被消费速度过慢，有超过1000条未被消费，触发流控
         if (cachedMessageCount > this.defaultMQPushConsumer.getPullThresholdForQueue()) {
             this.executePullRequestLater(pullRequest, PULL_TIME_DELAY_MILLS_WHEN_FLOW_CONTROL);
             if ((queueFlowControlTimes++ % 1000) == 0) {
@@ -245,6 +249,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
             return;
         }
 
+        //消息大小超过阈值也触发流控
         if (cachedMessageSizeInMiB > this.defaultMQPushConsumer.getPullThresholdSizeForQueue()) {
             this.executePullRequestLater(pullRequest, PULL_TIME_DELAY_MILLS_WHEN_FLOW_CONTROL);
             if ((queueFlowControlTimes++ % 1000) == 0) {
@@ -256,6 +261,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
         }
 
         if (!this.consumeOrderly) {
+            //ProcessQueue队列最大偏移量和最小偏移量不超过1000，否则也触发流控
             if (processQueue.getMaxSpan() > this.defaultMQPushConsumer.getConsumeConcurrentlyMaxSpan()) {
                 this.executePullRequestLater(pullRequest, PULL_TIME_DELAY_MILLS_WHEN_FLOW_CONTROL);
                 if ((queueMaxSpanFlowControlTimes++ % 1000) == 0) {
@@ -288,6 +294,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
             }
         }
 
+        //拉取订阅信息，如果为空，延迟三秒再试
         final SubscriptionData subscriptionData = this.rebalanceImpl.getSubscriptionInner().get(pullRequest.getMessageQueue().getTopic());
         if (null == subscriptionData) {
             this.executePullRequestLater(pullRequest, PULL_TIME_DELAY_MILLS_WHEN_EXCEPTION);
@@ -428,6 +435,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
             classFilter // class filter
         );
         try {
+            //与broker交互，发请求拉消息
             this.pullAPIWrapper.pullKernelImpl(
                 pullRequest.getMessageQueue(),
                 subExpression,
@@ -619,7 +627,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                 }
 
                 this.consumeMessageService.start();
-
+                //同一个JVM，所有消费者、生产者持有同一个MQClientInstance
                 boolean registerOK = mQClientFactory.registerConsumer(this.defaultMQPushConsumer.getConsumerGroup(), this);
                 if (!registerOK) {
                     this.serviceState = ServiceState.CREATE_JUST;

@@ -112,6 +112,7 @@ public class MQClientInstance {
         }
     });
     private final ClientRemotingProcessor clientRemotingProcessor;
+    //负责消费的拉取
     private final PullMessageService pullMessageService;
     private final RebalanceService rebalanceService;
     private final DefaultMQProducer defaultMQProducer;
