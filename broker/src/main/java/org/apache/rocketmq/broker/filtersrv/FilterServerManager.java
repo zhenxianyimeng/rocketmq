@@ -98,6 +98,7 @@ public class FilterServerManager {
         this.scheduledExecutorService.shutdown();
     }
 
+    //broker 注册filter
     public void registerFilterServer(final Channel channel, final String filterServerAddr) {
         FilterServerInfo filterServerInfo = this.filterServerTable.get(channel);
         if (filterServerInfo != null) {

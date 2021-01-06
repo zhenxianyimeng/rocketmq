@@ -862,7 +862,7 @@ public class BrokerController {
         // broker启动时，立即发送一次心跳
         this.registerBrokerAll(true, false, true);
 
-        // broker每个一定时间发送一次心跳
+        // broker每隔一定时间发送一次心跳
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

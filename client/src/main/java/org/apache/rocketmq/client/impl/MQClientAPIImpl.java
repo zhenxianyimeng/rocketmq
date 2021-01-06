@@ -348,7 +348,7 @@ public class MQClientAPIImpl {
         }
 
         request.setBody(msg.getBody());
-
+        //选择发送模式
         switch (communicationMode) {
             case ONEWAY:
                 this.remotingClient.invokeOneway(addr, request, timeoutMillis);
@@ -417,7 +417,7 @@ public class MQClientAPIImpl {
                         }
                     } catch (Throwable e) {
                     }
-
+                    // 发送之后，根据发送的状态，更新broker的状态，配合故障延迟机制使用
                     producer.updateFaultItem(brokerName, System.currentTimeMillis() - responseFuture.getBeginTimestamp(), false);
                     return;
                 }
