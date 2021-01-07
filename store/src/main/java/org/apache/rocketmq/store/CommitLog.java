@@ -571,9 +571,9 @@ public class CommitLog {
 
         long eclipseTimeInLock = 0;
         MappedFile unlockMappedFile = null;
-        //mappedFileQueue为 /store/commitlog文件夹
+        //mappedFileQueue为 /store/commitlog文件夹,从文件夹找到当前需要写入的文件
         MappedFile mappedFile = this.mappedFileQueue.getLastMappedFile();
-        //申请所，CommitLog文件写入是传行的
+        //申请锁，CommitLog文件写入是串行的
         putMessageLock.lock(); //spin or ReentrantLock ,depending on store config
         try {
             long beginLockTimestamp = this.defaultMessageStore.getSystemClock().now();
@@ -623,7 +623,7 @@ public class CommitLog {
             eclipseTimeInLock = this.defaultMessageStore.getSystemClock().now() - beginLockTimestamp;
             beginTimeInLock = 0;
         } finally {
-            putMessageLock.unlock();
+            putMessageLock.unlock();//释放锁
         }
 
         if (eclipseTimeInLock > 500) {
@@ -639,8 +639,9 @@ public class CommitLog {
         // Statistics
         storeStatsService.getSinglePutMessageTopicTimesTotal(msg.getTopic()).incrementAndGet();
         storeStatsService.getSinglePutMessageTopicSizeTotal(topic).addAndGet(result.getWroteBytes());
-
+        //前面只是放到MappedFile，还要选择刷盘策略进行刷盘
         handleDiskFlush(result, putMessageResult, msg);
+        //刷盘后，进行主从同步
         handleHA(result, putMessageResult, msg);
 
         return putMessageResult;
@@ -1317,7 +1318,7 @@ public class CommitLog {
                 this.msgStoreItemMemory.put(propertiesData);
 
             final long beginTimeMills = CommitLog.this.defaultMessageStore.now();
-            // Write messages to the queue buffer，放到内存映射中，并没有输盘
+            // Write messages to the queue buffer，放到内存映射中，并没有刷盘
             byteBuffer.put(this.msgStoreItemMemory.array(), 0, msgLen);
 
             AppendMessageResult result = new AppendMessageResult(AppendMessageStatus.PUT_OK, wroteOffset, msgLen, msgId,

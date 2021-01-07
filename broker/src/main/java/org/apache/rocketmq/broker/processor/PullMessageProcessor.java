@@ -67,7 +67,7 @@ import org.apache.rocketmq.store.config.BrokerRole;
 import org.apache.rocketmq.store.stats.BrokerStatsManager;
 
 /**
- * broker处理小区拉取的入口   processRequest
+ * broker处理消息拉取的入口   processRequest
  */
 public class PullMessageProcessor implements NettyRequestProcessor {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
@@ -89,6 +89,14 @@ public class PullMessageProcessor implements NettyRequestProcessor {
         return false;
     }
 
+    /**
+     *
+     * @param channel
+     * @param request
+     * @param brokerAllowSuspend 长轮询，支持挂起
+     * @return
+     * @throws RemotingCommandException
+     */
     private RemotingCommand processRequest(final Channel channel, RemotingCommand request, boolean brokerAllowSuspend)
         throws RemotingCommandException {
         RemotingCommand response = RemotingCommand.createResponseCommand(PullMessageResponseHeader.class);
@@ -236,7 +244,7 @@ public class PullMessageProcessor implements NettyRequestProcessor {
                 this.brokerController.getConsumerFilterManager());
         }
 
-        //通过getMessage查找到消息
+        //根据MessageStore.getMessage查找到消息
         final GetMessageResult getMessageResult =
             this.brokerController.getMessageStore().getMessage(requestHeader.getConsumerGroup(), requestHeader.getTopic(),
                 requestHeader.getQueueId(), requestHeader.getQueueOffset(), requestHeader.getMaxMsgNums(), messageFilter);

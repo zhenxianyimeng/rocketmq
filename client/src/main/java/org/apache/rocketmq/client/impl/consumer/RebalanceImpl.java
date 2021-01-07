@@ -217,7 +217,7 @@ public abstract class RebalanceImpl {
     }
 
     public void doRebalance(final boolean isOrder) {
-        //topic的订阅信息
+        //topic的订阅信息，String为topic name
         Map<String, SubscriptionData> subTable = this.getSubscriptionInner();
         if (subTable != null) {
             for (final Map.Entry<String, SubscriptionData> entry : subTable.entrySet()) {
@@ -259,6 +259,7 @@ public abstract class RebalanceImpl {
                 break;
             }
             case CLUSTERING: {
+                //获取mq队列列表，和消费者列表
                 Set<MessageQueue> mqSet = this.topicSubscribeInfoTable.get(topic);
                 List<String> cidAll = this.mQClientFactory.findConsumerIdList(topic, consumerGroup);
                 if (null == mqSet) {
@@ -274,7 +275,7 @@ public abstract class RebalanceImpl {
                 if (mqSet != null && cidAll != null) {
                     List<MessageQueue> mqAll = new ArrayList<MessageQueue>();
                     mqAll.addAll(mqSet);
-
+                    //排序，保证每个Consumer得到的结果一样
                     Collections.sort(mqAll);
                     Collections.sort(cidAll);
 

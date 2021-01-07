@@ -109,6 +109,7 @@ public class PullRequestHoldService extends ServiceThread {
         }
     }
 
+    //唤醒，消费者长轮询等待的线程
     public void notifyMessageArriving(final String topic, final int queueId, final long maxOffset) {
         notifyMessageArriving(topic, queueId, maxOffset, null, 0, null, null);
     }

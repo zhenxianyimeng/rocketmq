@@ -36,6 +36,7 @@ import org.apache.rocketmq.common.protocol.body.ProcessQueueInfo;
 
 /**
  * Queue consumption snapshot
+ * 相当于Broker上的ConsumerQueue的快照
  */
 public class ProcessQueue {
     public final static long REBALANCE_LOCK_MAX_LIVE_TIME =

@@ -216,7 +216,7 @@ public class PullAPIWrapper {
             if (PullSysFlag.hasClassFilterFlag(sysFlagInner)) {
                 brokerAddr = computPullFromWhichFilterServer(mq.getTopic(), brokerAddr);
             }
-
+            //调用client 拉取消息
             PullResult pullResult = this.mQClientFactory.getMQClientAPIImpl().pullMessage(
                 brokerAddr,
                 requestHeader,

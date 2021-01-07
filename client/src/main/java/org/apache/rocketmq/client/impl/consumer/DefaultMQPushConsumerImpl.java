@@ -214,6 +214,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
      * @param pullRequest
      */
     public void pullMessage(final PullRequest pullRequest) {
+        //ProcessQueue是MessageQueue在消费端的重现
         final ProcessQueue processQueue = pullRequest.getProcessQueue();
         if (processQueue.isDropped()) {
             log.info("the pull request[{}] is dropped.", pullRequest.toString());
@@ -303,11 +304,14 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
         }
 
         final long beginTimestamp = System.currentTimeMillis();
-
+        /**
+         * 请求消息成功后的回调
+         */
         PullCallback pullCallback = new PullCallback() {
             @Override
             public void onSuccess(PullResult pullResult) {
                 if (pullResult != null) {
+                    //将byte数组转化成msgFoundList
                     pullResult = DefaultMQPushConsumerImpl.this.pullAPIWrapper.processPullResult(pullRequest.getMessageQueue(), pullResult,
                         subscriptionData);
 
@@ -321,6 +325,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
 
                             long firstMsgOffset = Long.MAX_VALUE;
                             if (pullResult.getMsgFoundList() == null || pullResult.getMsgFoundList().isEmpty()) {
+                                //如果列表为空，将请求放回队列，等待下次拉取
                                 DefaultMQPushConsumerImpl.this.executePullRequestImmediately(pullRequest);
                             } else {
                                 firstMsgOffset = pullResult.getMsgFoundList().get(0).getQueueOffset();
@@ -329,6 +334,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                                     pullRequest.getMessageQueue().getTopic(), pullResult.getMsgFoundList().size());
 
                                 boolean dispatchToConsume = processQueue.putMessage(pullResult.getMsgFoundList());
+                                //提交消息到线程
                                 DefaultMQPushConsumerImpl.this.consumeMessageService.submitConsumeRequest(
                                     pullResult.getMsgFoundList(),
                                     processQueue,
@@ -336,6 +342,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                                     dispatchToConsume);
 
                                 if (DefaultMQPushConsumerImpl.this.defaultMQPushConsumer.getPullInterval() > 0) {
+                                    //如果配置了拉取间隔
                                     DefaultMQPushConsumerImpl.this.executePullRequestLater(pullRequest,
                                         DefaultMQPushConsumerImpl.this.defaultMQPushConsumer.getPullInterval());
                                 } else {
@@ -435,7 +442,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
             classFilter // class filter
         );
         try {
-            //与broker交互，发请求拉消息
+            //与broker交互，发请求拉消息，请求发生的地方
             this.pullAPIWrapper.pullKernelImpl(
                 pullRequest.getMessageQueue(),
                 subExpression,
@@ -1021,6 +1028,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
     @Override
     public void doRebalance() {
         if (!this.pause) {
+            //每个DefaultMQPushConsumerImpl都有一个rebalanceImpl对象
             this.rebalanceImpl.doRebalance(this.isConsumeOrderly());
         }
     }

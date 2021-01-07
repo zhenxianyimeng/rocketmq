@@ -93,7 +93,7 @@ public class PullMessageService extends ServiceThread {
 
         while (!this.isStopped()) {
             try {
-                //
+                //从队列拿request，PullRequest在消费完成后，重新放入，或者在RebalanceImpl中创建
                 PullRequest pullRequest = this.pullRequestQueue.take();
                 this.pullMessage(pullRequest);
             } catch (InterruptedException ignored) {

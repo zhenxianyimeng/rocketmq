@@ -261,7 +261,7 @@ public class DefaultMessageStore implements MessageStore {
             }
             log.info("[SetReputOffset] maxPhysicalPosInLogicQueue={} clMinOffset={} clMaxOffset={} clConfirmedOffset={}",
                 maxPhysicalPosInLogicQueue, this.commitLog.getMinOffset(), this.commitLog.getMaxOffset(), this.commitLog.getConfirmOffset());
-            // 从CommitLog的哪个偏移量开始发送
+            // 从CommitLog的哪个偏移量开始发送，用来构建ConsumerQueue和IndexFile
             this.reputMessageService.setReputFromOffset(maxPhysicalPosInLogicQueue);
             this.reputMessageService.start();
 

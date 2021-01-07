@@ -114,6 +114,7 @@ public class MQClientInstance {
     private final ClientRemotingProcessor clientRemotingProcessor;
     //负责消费的拉取
     private final PullMessageService pullMessageService;
+    //消息队列的负载，对应到Broker端的ConsumerQueue
     private final RebalanceService rebalanceService;
     private final DefaultMQProducer defaultMQProducer;
     private final ConsumerStatsManager consumerStatsManager;
